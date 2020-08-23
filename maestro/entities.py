@@ -106,7 +106,7 @@ class Ship(Entity):
                  socket_path=None, api_version=None, timeout=None,
                  ssh_tunnel=None, tls=None, tls_verify=False,
                  tls_ca_cert=None, tls_cert=None, tls_key=None,
-                 ssl_version=None):
+                 ssl_version=None, log_drivers=None):
         """Instantiate a new ship.
 
         Args:
@@ -122,6 +122,7 @@ class Ship(Entity):
         Entity.__init__(self, name)
         self._ip = ip
         self._endpoint = endpoint or ip
+        self._log_drivers = log_drivers or []
         self._docker_port = int(
             docker_port or
             (self.DEFAULT_DOCKER_TLS_PORT if tls
@@ -192,6 +193,11 @@ class Ship(Entity):
         """Returns the Docker client wrapper to talk to the Docker daemon on
         this host."""
         return self._backend
+
+    @property
+    def log_drivers(self):
+        """Returns the Docker log drivers available on this host"""
+        return self._log_drivers
 
     def address(self, use_ip=False):
         name = self.ip if use_ip else self.name
@@ -493,7 +499,7 @@ class Container(Entity):
 
         # Get logging config.
         self.log_config = self._parse_log_config(
-            config.get('log_driver'), config.get('log_opt'))
+            config.get('log_driver'), config.get('log_opt'), self.ship.log_drivers)
 
         # Additional LXC configuration options. See the LXC documentation for a
         # reference of the available settings. Those are only supported if the
@@ -794,7 +800,7 @@ class Container(Entity):
             _parse_spec(src, spec)
         return result
 
-    def _parse_log_config(self, log_driver, log_opt):
+    def _parse_log_config(self, log_driver, log_opt, ship_log_drivers):
         """ Parse the log config found in the container's configuration.
 
         Args:
@@ -806,7 +812,7 @@ class Container(Entity):
             host_config.LogConfig variable.
         """
         if log_driver:
-            if log_driver not in LogConfig.types._values:
+            if log_driver not in LogConfig.types._values and log_driver not in ship_log_drivers:
                 raise exceptions.InvalidLogConfigurationException(
                     "log_driver must be one of ({0})"
                     .format(', '.join(LogConfig.types._values)))

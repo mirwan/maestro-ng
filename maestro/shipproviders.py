@@ -55,7 +55,8 @@ class StaticShipsProvider(ShipsProvider):
                 tls_key=self._from_ship_or_defaults(v, 'tls_key'),
                 tls_verify=self._from_ship_or_defaults(v, 'tls_verify'),
                 tls_ca_cert=self._from_ship_or_defaults(v, 'tls_ca_cert'),
-                ssl_version=self._from_ship_or_defaults(v, 'ssl_version')))
+                ssl_version=self._from_ship_or_defaults(v, 'ssl_version'),
+                log_drivers=self._from_ship_or_defaults(v, 'log_drivers')))
             for k, v in self._config['ships'].items())
 
     def ships(self):
