@@ -16,9 +16,10 @@ from . import exceptions
 from . import plays
 from . import shipproviders
 from . import termoutput
+import yaml
 
 AVAILABLE_MAESTRO_COMMANDS = ['status', 'start', 'stop', 'restart',
-                              'pull', 'clean', 'logs', 'deptree']
+                              'pull', 'clean', 'logs', 'deptree', 'render']
 
 
 class Conductor:
@@ -630,3 +631,7 @@ class Conductor:
             treehelper(service, ' ', set([]))
             if i < len(services):
                 print()
+                
+    def render(self, **kwargs):
+        """Display the rendered config"""
+        print(yaml.dump(self._config))
