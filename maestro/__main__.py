@@ -190,6 +190,12 @@ def create_parser():
         'tokens', nargs='*',
         help='command tokens')
 
+    # render
+    subparser = subparsers.add_parser(
+        name='render',
+        description='Display rendered config',
+        help='show the rendered yaml')
+
     return parser
 
 
@@ -216,7 +222,7 @@ def execute(options, config):
                  'and --all not set.\n').format(options.command))
             return 1
 
-        if options.command != 'complete' and not options.things:
+        if options.command != 'complete' and options.command != 'render' and not options.things:
             options.things = [s.name for s in c.services.values()
                               if options.command == 'status' or not s.omit]
             options.with_dependencies = \
