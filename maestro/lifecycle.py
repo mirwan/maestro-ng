@@ -84,7 +84,7 @@ class TCPPortPinger(RetryingLifecycleHelper):
             raise exceptions.InvalidLifecycleCheckConfigurationException(
                 'Port {} is not TCP!'.format(config['port']))
 
-        return TCPPortPinger(container.ship.ip, int(parts[0]),
+        return TCPPortPinger(container.ship.endpoint if container.ship.lifecycle_use_endpoint else container.ship.ip, int(parts[0]),
                              attempts=config.get('max_wait'))
 
 
