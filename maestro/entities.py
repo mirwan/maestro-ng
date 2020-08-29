@@ -106,7 +106,7 @@ class Ship(Entity):
                  socket_path=None, api_version=None, timeout=None,
                  ssh_tunnel=None, tls=None, tls_verify=False,
                  tls_ca_cert=None, tls_cert=None, tls_key=None,
-                 ssl_version=None, log_drivers=None):
+                 ssl_version=None, log_drivers=None, lifecycle_use_endpoint=False):
         """Instantiate a new ship.
 
         Args:
@@ -123,6 +123,7 @@ class Ship(Entity):
         self._ip = ip
         self._endpoint = endpoint or ip
         self._log_drivers = log_drivers or []
+        self._lifecycle_use_endpoint = lifecycle_use_endpoint
         self._docker_port = int(
             docker_port or
             (self.DEFAULT_DOCKER_TLS_PORT if tls
@@ -198,6 +199,11 @@ class Ship(Entity):
     def log_drivers(self):
         """Returns the Docker log drivers available on this host"""
         return self._log_drivers
+
+    @property
+    def lifecycle_use_endpoint(self):
+        """Returns whether endpoint should used instead of ip for lifecycle"""
+        return self._lifecycle_use_endpoint
 
     def address(self, use_ip=False):
         name = self.ip if use_ip else self.name
