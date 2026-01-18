@@ -165,7 +165,7 @@ class Ship(Entity):
         else:
             proto = "https" if (tls or tls_verify) else "http"
             self._backend_url = '{:s}://{:s}:{:d}'.format(
-                proto, self._endpoint, self._docker_port)
+                proto, '[{:s}]'.format(self._endpoint) if ':' in self._endpoint else self._endpoint, self._docker_port)
 
         self._tls = docker.tls.TLSConfig(
             verify=tls_verify,
