@@ -715,11 +715,17 @@ class Container(Entity):
         """Ping a single port, by its given name in the port mappings. Returns
         True if the port is opened and accepting connections, False
         otherwise."""
+        external_endpoint = self.ports[port]['external'][0]
         parts = self.ports[port]['external'][1].split('/')
         if parts[1] == 'udp':
             return False
 
-        return lifecycle.TCPPortPinger(self.ship.endpoint if self.ship.lifecycle_use_endpoint else self.ship.ip, int(parts[0]), 1).test()
+        if external_endpoint in ['0.0.0.0', '::']:
+            ping_host = self.ship.endpoint if self.ship.lifecycle_use_endpoint else self.ship.ip
+        else:
+            ping_host = "[{}]".format(external_endpoint) if ':' in external_endpoint else external_endpoint
+
+        return lifecycle.TCPPortPinger(ping_host, int(parts[0]), 1).test()
 
     def _parse_bytes(self, s):
         if not s or not isinstance(s, six.string_types):

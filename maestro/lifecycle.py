@@ -79,13 +79,18 @@ class TCPPortPinger(RetryingLifecycleHelper):
                 'Port {} is not defined by {}!'.format(
                     config['port'], container.name))
 
+        external_endpoint = container.ports[config['port']]['external'][0]
         parts = container.ports[config['port']]['external'][1].split('/')
         if parts[1] == 'udp':
             raise exceptions.InvalidLifecycleCheckConfigurationException(
                 'Port {} is not TCP!'.format(config['port']))
 
-        return TCPPortPinger(container.ship.endpoint if container.ship.lifecycle_use_endpoint else container.ship.ip, int(parts[0]),
-                             attempts=config.get('max_wait'))
+        if external_endpoint in ['0.0.0.0', '::']:
+            ping_host = container.ship.endpoint if container.ship.lifecycle_use_endpoint else container.ship.ip
+        else:
+            ping_host = "[{}]".format(external_endpoint) if ':' in external_endpoint else external_endpoint
+
+        return TCPPortPinger(ping_host, int(parts[0]), attempts=config.get('max_wait'))
 
 
 class ScriptExecutor(RetryingLifecycleHelper):
