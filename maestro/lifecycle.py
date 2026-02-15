@@ -88,7 +88,7 @@ class TCPPortPinger(RetryingLifecycleHelper):
         if external_endpoint in ['0.0.0.0', '::']:
             ping_host = container.ship.endpoint if container.ship.lifecycle_use_endpoint else container.ship.ip
         else:
-            ping_host = "[{}]".format(external_endpoint) if ':' in external_endpoint else external_endpoint
+            ping_host = external_endpoint
 
         return TCPPortPinger(ping_host, int(parts[0]), attempts=config.get('max_wait'))
 
@@ -253,6 +253,8 @@ class HttpRequestLifecycle(BaseLifecycleHelper):
             host = config.get('host')
             del config['host']
 
+        http_host = "[{}]".format(host) if ':' in host else host
+
         port = None
         if config['port'] not in container.ports:
             try:
@@ -274,7 +276,7 @@ class HttpRequestLifecycle(BaseLifecycleHelper):
         opts.update(**config)
         del opts['port']
         del opts['type']
-        return HttpRequestLifecycle(host, port, **opts)
+        return HttpRequestLifecycle(http_host, port, **opts)
 
 
 class LifecycleHelperFactory:
