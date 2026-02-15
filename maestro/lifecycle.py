@@ -248,7 +248,11 @@ class HttpRequestLifecycle(BaseLifecycleHelper):
 
     @staticmethod
     def from_config(container, config):
-        host = container.ship.endpoint if container.ship.lifecycle_use_endpoint else container.ship.ip
+        external_endpoint = container.ports[config['port']]['external'][0]
+        if external_endpoint in ['0.0.0.0', '::']:
+            host = container.ship.endpoint if container.ship.lifecycle_use_endpoint else container.ship.ip
+        else:
+            host = external_endpoint
         if config.get('host'):
             host = config.get('host')
             del config['host']
